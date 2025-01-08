@@ -83,7 +83,7 @@ class SnakeGame:
         reward = 0
 
         game_over = False
-        if self._is_collision() or self.frame_iterations>100*len(self.snake): 
+        if self.is_collision() or self.frame_iterations>100*len(self.snake): 
             #longer the snake, more time we're giving it
             # second condition is to ensure the model isn't looping/doing nothing
             game_over = True
@@ -104,7 +104,7 @@ class SnakeGame:
         # 6. return game over and score
         return reward, game_over, self.score
     
-    def _is_collision(self, pt=None):
+    def is_collision(self, pt=None):
         if pt is None:
             pg = self.head
         # hits boundary
