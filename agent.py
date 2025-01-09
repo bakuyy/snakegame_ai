@@ -4,7 +4,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
-
+from helper import plot
 
 MAX_MEMORY = 100_000 #store max 100k items in this memory
 BATCH_SIZE = 1000 
@@ -125,48 +125,52 @@ class Agent:
             final_move[move] = 1 #start by randomly moving around
         else:
             #converts state into a tensor, ensuring that data type is explicitly set to torch.float32
-            state0 = torch.tensor(state,dtype=torch.float)
+            state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0) #prediction might look like [5.0,2.7,1.0]
             move = torch.argmax(prediction).item() # from above, we take the max and represent it as the move [1,0,0]
             final_move[move] = 1 # see line above, we change it to one
 
         return final_move
 
-    def train():
-        plot_scores = []
-        plot_mean_score = []
+def train():
+    plot_scores = []
+    plot_mean_score = []
 
-        total_score = 0
-        record = 0
+    total_score = 0
+    record = 0
 
-        agent = Agent()
-        game = SnakeGameAI()
+    agent = Agent()
+    game = SnakeGameAI()
 
-        while True:
-            prev_state = agent.get_state(game) #previous state
-            final_move = agent.get_action(prev_state) #get move
-            reward,done,score = game.play_step(final_move)
-            new_state = agent.get_state(game)
+    while True:
+        prev_state = agent.get_state(game) #previous state
+        final_move = agent.get_action(prev_state) #get move
+        reward,done,score = game.play_step(final_move)
+        new_state = agent.get_state(game)
 
-            #train short memory: based on one step
-            agent.train_short_memory(prev_state,final_move,reward,new_state,done)
-            agent.remember(prev_state,final_move,reward,new_state,done) #stores it into memory
+        #train short memory: based on one step
+        agent.train_short_memory(prev_state,final_move,reward,new_state,done)
+        agent.remember(prev_state,final_move,reward,new_state,done) #stores it into memory
 
-            if done: #game is over
-                #train the long memory, called replay memory or experience replay
-                #plot the results
-                game.reset()
-                agent.n_games += 1
-                agent.train_long_memory()
+        if done: #game is over
+            #train the long memory, called replay memory or experience replay
+            #plot the results
+            game.reset()
+            agent.n_games += 1
+            agent.train_long_memory()
 
-                if score > record:
-                    record = score
-                    agent.model.save() #if we have a new high score, we call this
-                print('Game',agent.n_games,'Score', score, 'Record:', record)
+            if score > record:
+                record = score
+                agent.model.save() #if we have a new high score, we call this
+            print('Game',agent.n_games,'Score', score, 'Record:', record)
 
-                #TODO: plot the results
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_score.append(mean_score)
+            plot(plot_scores, plot_mean_score)
 
-        pass
     
-    if __name__=="__main__":
-        train()
+
+if __name__=="__main__":
+    train()

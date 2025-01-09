@@ -8,7 +8,7 @@ class Linear_QNet(nn.Module): #this will be a feedforward model with an input, h
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.linear1 = nn.Linear(input_size,hidden_size) #input is input_size and output as hidden_size
-        self.linear2 = nn.Linear(hidden_size,input_size) #input is hidden_size and output as input_size
+        self.linear2 = nn.Linear(hidden_size,output_size) #input is hidden_size and output as input_size
 
 
 
@@ -31,7 +31,7 @@ class Linear_QNet(nn.Module): #this will be a feedforward model with an input, h
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
         file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict)
+        torch.save(self.state_dict, file_name)
 
     #optimizations
 class QTrainer:
